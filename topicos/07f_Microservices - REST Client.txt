@@ -1,0 +1,169 @@
+
+====================================================================================================
+CURSO SPRING BOOT - MICROSERVICES - REST Client
+====================================================================================================
+
+Introduction
+----------------------------------------------------------------------------------------------------
+There are many ways to implement communication between services in a microservice architecture. The
+more commons are:
+
+- RestTemplate
+- Open Feign client
+
+
+Adding Open Feign Client
+----------------------------------------------------------------------------------------------------
+
+- Add the Spring Cloud dependencies in 'pom.xml' of Payroll Project
+
+  ...
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>2020.0.3</version>
+        <type>pom</type>
+        <scope>runtime</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  ...
+
+
+- Defining name for each services
+
+  - Add following line in 'application.properties' of employee service
+
+    spring.application.name=employee-service
+
+  - Add following line in 'application.properties' of payslip service
+
+    spring.application.name=payslip-service
+
+  - Add following line in 'application.properties' of payroll service
+
+    spring.application.name=payroll-service
+
+
+- Adding Feign Client dependencies in payroll service
+
+   ...
+   <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-openfeign</artifactId>
+      <version>3.0.3</version> 
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-spring-boot2</artifactId>
+      <version>1.7.1</version>
+    </dependency>
+    ...
+
+
+- Enable support to feign client in main class of payroll service
+ 
+@SpringBootApplication
+@EnableFeignClients
+public class StartApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(StartApplication.class, args);
+  }
+  
+}
+
+
+- Create the 'com.ctseducare.payroll.feignclient' package
+
+
+- Copy 'Employee' class from 'employee' project and remove all JPA annotations
+
+
+- Create the 'EmployeeFeignClient' class
+
+@FeignClient(name="employee-service", url = "localhost:8080")
+public interface EmployeeFeignClient {
+
+  @GetMapping("/employee")
+  ResponseEntity<List<Employee>> findAll();
+   
+}
+
+
+- Change the PayrollService as below
+
+  ...
+  @Autowired
+  EmployeeFeignClient employee;
+  
+  public PayrollDTO generatePayroll() {
+    List<Employee> employees = employee.findAll().getBody();
+
+    PayrollDTO payroll = new PayrollDTO();
+    payroll.setDatetime(LocalDateTime.now());
+
+    for (Employee employee : employees) {
+      PayslipDTO payslip = new PayslipDTO();
+      payslip.setId(employee.getId());
+      payslip.setName(employee.getName());
+      payslip.setSalary(employee.getSalary());
+      payroll.getPayslips().add(payslip);
+    }
+    
+    return payroll;
+  }
+  ...
+
+
+- Create the 'PayslipFeignClient' class
+
+@FeignClient(name="payslip-service", url = "localhost:8081")
+public interface PayslipFeignClient {
+
+  @PostMapping("/payslip")
+  ResponseEntity<List<PayslipDTO>> payslips(@RequestBody List<EmployeeDTO> employees);
+   
+}
+
+
+- Inject the 'PayslipFeignClient' in 'PayrollService'
+
+  ...
+  @Autowired
+  PayslipFeignClient payslip;
+  ...
+
+
+- Change the 'generatePayroll' method
+
+  ...
+  public PayrollDTO generatePayroll() {
+    List<Employee> employees = employee.findAll().getBody();
+
+    List<EmployeeDTO> employeeDTOs = new ArrayList<>();
+    for (Employee employee : employees) {
+      EmployeeDTO e = new EmployeeDTO();
+      e.setId(employee.getId());
+      e.setName(employee.getName());
+      e.setSalary(employee.getSalary());
+      employeeDTOs.add(e);
+    }
+    
+    List<PayslipDTO> payslipDTOs = payslip.payslips(employeeDTOs).getBody();
+    
+    PayrollDTO payroll = new PayrollDTO();
+    payroll.setDatetime(LocalDateTime.now());
+    payroll.setPayslips(payslipDTOs);
+    
+    return payroll;
+  }
+  ...
+
+

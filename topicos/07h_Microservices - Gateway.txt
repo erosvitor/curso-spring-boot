@@ -1,0 +1,72 @@
+
+====================================================================================================
+CURSO SPRING BOOT - MICROSERVICES - GATEWAY
+====================================================================================================
+
+Introduction
+----------------------------------------------------------------------------------------------------
+
+
+Creating the Gateway Server service
+----------------------------------------------------------------------------------------------------
+- Select the 'spring-boot-microservices' project and File > New > Other > Maven Module
+
+- Check the 'Create a simple project'
+
+- Type 'gatewayserver' in 'Module name' field and click on 'Finish' button
+
+- Adding the Gateway dependency
+
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-gateway</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+  	<dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+  </dependencies>
+  ...
+
+- Create the 'com.ctseducare.gateway' package
+
+- Create the 'StartApplication' class
+
+@SpringBootApplication
+@EnableEurekaClient
+public class StartApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(StartApplication.class, args);
+  }
+  
+}
+
+
+- Add following configurations in 'application.properties'
+
+server.port=8888
+spring.application.name=gateway-server
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+eureka.instance.instance-id=${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+- Create the 'com.ctseducare.gateway.config' package
+
+- Create the 'RoutesConfig' class
+
+@Configuration
+public class RoutesConfig {
+
+  @Bean
+  public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
+    return builder.routes()
+        .route(r -> r.path("/employee/**").uri("lb://EMPLOYEE-SERVICE"))
+        .route(r -> r.path("/payroll/**").uri("lb://PAYROLL-SERVICE"))
+        .build();
+  }
+
+}

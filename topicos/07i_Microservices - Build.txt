@@ -1,0 +1,19 @@
+
+====================================================================================================
+CURSO SPRING BOOT - MICROSERVICES - BUILD
+====================================================================================================
+
+Building the Payroll Application
+----------------------------------------------------------------------------------------------------
+- Add the following plugin in all modules
+
+  ...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+  ...

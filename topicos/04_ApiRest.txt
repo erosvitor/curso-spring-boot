@@ -1,0 +1,217 @@
+
+====================================================================================================
+CURSO SPRING BOOT - API REST
+====================================================================================================
+
+Criando o projeto
+----------------------------------------------------------------------------------------------------
+- Criar um projeto 'Spring Starter Project' utilizando os seguintes dados:
+
+  Name: spring-boot-apirest
+  Type: Maven Project
+  Packaging: jar
+  Java Version: 16
+  Language: Java
+  Group: com.ctseducare
+  Artifact: apirest
+  Version: 0.0.1-SNAPSHOT
+
+- Adicionar as seguintes dependencias:
+
+  - Spring Web
+
+
+Criando o controller
+----------------------------------------------------------------------------------------------------
+- Criar um pacote chamado 'com.ctseducare.apirest.controller'
+
+- Criar a classe 'TaskController' com o conteúdo abaixo.
+
+@RestController
+public class TaskController {
+	
+	@GetMapping("/status")
+	public String status() {
+		return "I am OK";
+	}
+
+}
+
+
+Testando a aplicação
+----------------------------------------------------------------------------------------------------
+- Iniciar a aplicação
+
+- Acessar a aplicação pela URL http://localhost:8080/status
+
+
+Adicionando suporte a banco de dados MySQL
+----------------------------------------------------------------------------------------------------
+- Acessar o console do MySQL e criar um banco de dados chamado 'tasks'
+
+- Selecionar o projeto, botão direito selecionar Spring > Add Starters
+
+- Selecionar 'Spring Data JPA' e 'MySQL Driver'
+
+- Adicionar as linhas abaixo no arquivo 'application.properties'
+
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/tasks
+spring.datasource.username=root
+spring.datasource.password=root
+
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL57Dialect
+spring.jpa.hibernate.ddl-auto=create-drop
+
+
+Criando o model
+----------------------------------------------------------------------------------------------------
+- Criar um pacote chamado 'com.ctseducare.apirest.model'
+
+- Criar a classe 'Task' com o conteúdo abaixo.
+
+@Entity
+@Table(name="tasks")
+public class Task {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
+  private String description;
+  private LocalDateTime datetimeStart;
+
+  // Getters and Setters
+
+}
+
+
+Criando o repositório
+----------------------------------------------------------------------------------------------------
+- Criar um pacote chamado 'com.ctseducare.apirest.repository'
+
+- Criar a interface 'TaskRepository' com o conteúdo abaixo.
+
+public interface TaskRepository extends JpaRepository<Task, Integer> {
+
+}
+
+
+Injetando o repositório no controller
+----------------------------------------------------------------------------------------------------
+- Na classe 'TaskController' adicionar as linhas abaixo.
+
+  @Autowired
+  TaskRepository repository;
+
+
+Criando o endpoint para inserir uma tarefa
+----------------------------------------------------------------------------------------------------
+- Adicionar as linhas abaixo no arquivo 'TaskController'
+
+  @PostMapping("/tasks")
+  public ResponseEntity<Task> save(@RequestBody Task task) {
+    repository.save(task);
+    return ResponseEntity.ok(task);
+  }
+
+
+Criando o endpoint para listar todas as tarefas
+----------------------------------------------------------------------------------------------------
+- Adicionar as linhas abaixo no arquivo 'TaskController'
+
+  @GetMapping("/tasks")
+  public ResponseEntity<List<Task>> findAll() {
+    return ResponseEntity.ok(repository.findAll()); 
+  }
+
+
+Criando o endpoint para atualizar uma tarefa
+----------------------------------------------------------------------------------------------------
+- Adicionar as linhas abaixo no arquivo 'TaskController'
+
+  @PutMapping("/tasks")
+  public ResponseEntity<Task> update(@RequestBody Task task) {
+    repository.save(task);
+    return ResponseEntity.ok(task);
+  }
+
+
+Criando o endpoint para remover uma tarefa
+----------------------------------------------------------------------------------------------------
+- Adicionar as linhas abaixo no arquivo 'TaskController'
+
+  @DeleteMapping("/tasks/{id}")
+  public ResponseEntity<String> delete(@PathVariable("id") Integer id) {
+    repository.deleteById(id);
+    return ResponseEntity.ok("Item removed successful!");
+  }
+
+
+Testando a aplicação
+----------------------------------------------------------------------------------------------------
+- Reiniciar a aplicação
+
+- Acessar a aplicação pela URL http://localhost:8080/status
+
+
+Adicionando documentação
+----------------------------------------------------------------------------------------------------
+- Adicionar a dependência do OpenAPI no 'pom.xml'
+
+  <dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-ui</artifactId>
+    <version>1.5.10</version>
+  </dependency>
+
+- Adicionar as seguintes anotações na classe 'TaskController'
+
+  - Após a annotation @RestController
+
+    @Tag(name="Task Endpoint", description="")
+
+  - Antes da assinatura de cada método
+
+    @Operation(summary="...")
+
+- Criar um pacote chamado 'com.ctseducare.apirest.config'
+
+- Criar a classe 'OpenAPIConfig' com o conteúdo abaixo
+
+@Configuration
+public class OpenAPIConfig {
+
+  @Bean
+  public OpenAPI customOpenApi() {
+    return new OpenAPI()
+        .info(new Info()
+            .title("REST API for task management")
+            .version("v1")
+            .description("This API provide resources for create, list, change and delete tasks.")
+            .termsOfService("http://swagger.io/terms/")
+            .license(new License().name("Apache 2.0").url("http://springdoc.org")
+        ));
+  }  
+  
+}
+
+
+Acessando a documentação
+----------------------------------------------------------------------------------------------------
+- Reiniciar a aplicação
+
+- Acessar a documentação
+
+  http://localhost:8080/swagger-ui.html
+
+
+Importando a documentação no Postman
+----------------------------------------------------------------------------------------------------
+- Abrir o Postman
+
+- Selecionar menu File > Import
+
+- Selecionar a aba Link e informar o endereço abaixo no campo 'Enter a URL'
+
+  http://localhost:8080/v3/api-docs
+

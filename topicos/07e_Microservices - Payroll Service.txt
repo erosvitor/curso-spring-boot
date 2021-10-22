@@ -1,0 +1,155 @@
+
+====================================================================================================
+CURSO SPRING BOOT - MICROSERVICES - PAYROLL SERVICE
+====================================================================================================
+
+Creating the service
+----------------------------------------------------------------------------------------------------
+
+TIP: The service will be a Maven Module
+
+- Select the 'spring-boot-microservices' project and File > New > Other > Maven Module
+
+- Check the 'Create a simple project'
+
+- Type 'payroll' in 'Module name' field and click on 'Finish' button
+
+- Add the 'starter web' dependency on 'pom.xml' file
+
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+  </dependencies>
+  ...
+
+- Create the 'com.ctseducare.payroll' package
+
+- Create the 'StartApplication' class
+
+@SpringBootApplication
+public class StartApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(StartApplication.class, args);
+  }
+  
+}
+
+- Create the 'com.ctseducare.payroll.controller' package
+
+- Create the 'PayrollController' class
+
+@RestController
+public class PayrollController {
+
+  @GetMapping
+  String status() {
+    return "I am up!";
+  }
+  
+}
+
+- Defining the server port
+
+  server.port=8082
+
+- Cheking the 'payroll' service
+
+  - Start the 'payroll' service
+
+  - Enter the http://localhost:8082 in your browser
+
+
+Creating DTOs
+----------------------------------------------------------------------------------------------------
+
+TIP: The DTO is a design pattern designed to transfer data between system layers.
+
+- Create the 'com.ctseducare.payroll.dto' package
+
+- Create the 'EmployeeDTO' class
+
+public class EmployeeDTO {
+
+  private Integer id;
+  private String name;
+  private Double salary;
+
+  // Getters and Setters
+}
+
+- Create the 'PayslipDTO' class
+
+public class PayslipDTO {
+
+  private Integer id;
+  private String name;
+  private Double salary;
+  private Double fgts;
+  private Double inss;
+
+  // Getters and Setters
+}
+
+- Create the 'PayrollDTO' class
+
+public class PayrollDTO {
+
+  private LocalDateTime datetime;
+  private List<PayslipDTO> payslips;
+
+  public PayrollDTO() {
+    payslips = new ArrayList<>();
+  }
+
+  // Getters and Setters
+
+}
+
+
+Creating the service to generate payroll
+----------------------------------------------------------------------------------------------------
+- Create the 'com.ctseducare.payroll.service' package
+
+- Create the 'PayrollService' class
+
+@Service
+public class PayrollService {
+  
+  public PayrollDTO generatePayroll() {
+    PayrollDTO payroll = new PayrollDTO();
+    payroll.setDatetime(LocalDateTime.now());
+    return payroll;
+  }
+  
+}
+
+
+Adding endpoint to generate payroll
+----------------------------------------------------------------------------------------------------
+- Add the following lines in 'PayrollController' class
+
+  ...
+  @Autowired
+  PayrollService service;
+  
+  @GetMapping("/payroll")
+  ResponseEntity<PayrollDTO> generatePayroll() {
+    PayrollDTO payroll = service.generatePayroll();
+    return ResponseEntity.ok(payroll);
+  }
+  ...
+
+
+Cheking the 'payroll' service
+----------------------------------------------------------------------------------------------------
+- Start the service payroll
+
+- Start the Postman application
+
+- Create a GET request for 'http://localhost:8082/payroll'
+
+

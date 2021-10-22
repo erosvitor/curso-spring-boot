@@ -1,0 +1,217 @@
+
+====================================================================================================
+CURSO SPRING BOOT - MICROSERVICES - EMPLOYEE SERVICE
+====================================================================================================
+
+Creating the service
+----------------------------------------------------------------------------------------------------
+
+TIP: The service will be a Maven Module
+
+- Select the 'spring-boot-microservices' project and select File > New > Other > Maven Module
+
+- Check the 'Create a simple project' option
+
+- Type 'employee' in the 'Module name' field and click on 'Finish' button
+
+- Add the 'starter web' dependency on 'pom.xml' file
+
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+  </dependencies>
+  ...
+
+- Create the 'com.ctseducare.employee' package
+
+- Create the 'StartApplication' class
+
+@SpringBootApplication
+public class StartApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(StartApplication.class, args);
+  }
+  
+}
+
+- Create the 'com.ctseducare.employee.controller' package
+
+- Create the 'EmployeeController' class
+
+@RestController
+public class EmployeeController {
+
+  @GetMapping
+  String status() {
+    return "I am up!";
+  }
+  
+}
+
+- Defining the server port
+
+  server.port=8080
+
+- Checking the 'employee' service
+  
+  - Start the 'employee' service
+
+  - Enter the URL http://localhost:8080 in your browser
+
+
+Adicionando suporte ao MySQL Database
+----------------------------------------------------------------------------------------------------
+- Selecionar o projeto 'employee', com botão direito selecionar Spring > Add Starters
+
+- Selecionar Spring Data JPA e MySQL Driver e clicar no botão 'Next'
+
+- Adicioanar as linhas abaixo no arquivo 'application.properties'
+
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/employee
+spring.datasource.username=root
+spring.datasource.password=root
+
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL57Dialect
+spring.jpa.hibernate.ddl-auto=none
+
+- Criar um banco de dados chamado 'employee'
+
+- Criar a tabela 'employees'
+
+CREATE TABLE employees (
+  id INTEGER NOT NULL AUTO_INCREMENT,
+  name VARCHAR(60) NOT NULL,
+  email VARCHAR(80) NOT NULL,
+  salary DECIMAL(9,2) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+
+Criando o model
+----------------------------------------------------------------------------------------------------
+- Criar o pacote 'com.ctseducare.employee.model'
+
+- Criar a classe Employee conforme abaixo
+
+@Entity
+@Table(name = "employees")
+public class Employee {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
+  private String name;
+  private String email;
+  private Double salary;
+
+  // Getters and Setters
+
+}
+
+
+Criando o repositorio
+----------------------------------------------------------------------------------------------------
+- Criar o pacote 'com.ctseducare.employee.repository'
+
+- Criar a interface EmployeeRepository conforme abaixo
+
+public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
+
+}
+
+
+Criando o serviço
+----------------------------------------------------------------------------------------------------
+- Criar o pacote 'com.ctseducare.employee.service'
+
+- Criar a classe EmployeeService conforme abaixo
+
+@Service
+public class EmployeeService {
+
+  @Autowired
+  EmployeeRepository repository;
+  
+  public Employee insert(Employee employee) {
+    return repository.save(employee);
+  }
+  
+}
+
+
+Ajustando o controller
+----------------------------------------------------------------------------------------------------
+- Adicionar as linhas abaixo na classe 'EmployeeController'
+
+  ...
+  @Autowired
+  EmployeeService service;
+  
+  @PostMapping("/employee")
+  ResponseEntity<Employee> insert(@RequestBody Employee employee) {
+    Employee e = service.insert(employee);
+    return ResponseEntity.ok(e);
+  }
+  ...
+
+
+Testando o serviço
+----------------------------------------------------------------------------------------------------
+- Iniciar o serviço 'employee'
+
+- Abrir o Postman, criar uma requisição do tipo POST para o endpoint http://localhost:8080/employee
+  enviando o JSON abaixo
+
+  {
+    "name": "Fulano da Silva",
+    "email": "fulano@gmail.com",
+    "salary": 3500.00
+  }
+
+
+Adicionando demais operações
+----------------------------------------------------------------------------------------------------
+- Acrescentar as linhas abaixo na classe EmployeeService
+
+  ...
+  public List<Employee> findAll() {
+    return repository.findAll();
+  }
+  
+  public Employee update(Employee employee) {
+    return repository.save(employee);
+  }
+  
+  public void deleteById(Integer id) {
+    repository.deleteById(id);
+  }
+  ...
+
+- Acrescentar as linhas abaixo na classe EmployeeController
+
+  ...
+  @GetMapping("/employee")
+  ResponseEntity<List<Employee>> findAll() {
+    List<Employee> result = service.findAll();
+    return ResponseEntity.ok(result);
+  }
+
+  @PutMapping("/employee")
+  ResponseEntity<Employee> update(@RequestBody Employee employee) {
+    Employee result = service.update(employee);
+    return ResponseEntity.ok(result);
+  }
+
+  @DeleteMapping("/employee/{id}")
+  ResponseEntity<String> delete(@PathVariable("id") Integer id) {
+    service.delete(id);
+    return ResponseEntity.ok("Employee deleted!");
+  }
+  ...
+
+

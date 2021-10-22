@@ -1,0 +1,344 @@
+
+====================================================================================================
+CURSO SPRING BOOT - WEB APPLICATION
+====================================================================================================
+
+Criando o projeto
+----------------------------------------------------------------------------------------------------
+- Criar um projeto 'Spring Starter Project' utilizando os seguintes dados:
+
+  Name: spring-boot-web-application
+  Type: Maven Project
+  Packaging: jar
+  Java Version: 16
+  Language: Java
+  Group: com.ctseducare
+  Artifact: webapplication
+  Version: 0.0.1-SNAPSHOT
+
+- Adicionar as seguintes dependencias:
+
+  - Spring Web
+  - Thymeleaf
+  - Spring Data JPA
+  - H2 Database
+
+
+Criando o controller
+----------------------------------------------------------------------------------------------------
+Lembrete: Num framework 'action based' a requisição é entregue ao controller. O controller processará
+a requisição e retornará o nome da 'view' ao framework para ser renderizada ao cliente.
+
+- Criar um pacote chamado 'com.ctseducare.webapplication.controller'
+
+- Criar a classe 'PersonController' com o conteúdo abaixo.
+
+@Controller
+public class PersonController {
+	
+	@GetMapping("/persons")
+	public String findAll() {
+		return "Person";
+	}
+
+}
+
+
+Obs.: Ao digitar a URL 'http://localhost:8080/persons' no browser, a requisição chegará até o 
+controller e o mesmo retornará a string 'Person' que é o nome da página a ser renderizada para
+o usuário.
+
+
+Ajustando o Thymeleaf
+----------------------------------------------------------------------------------------------------
+- Acrescentar as configurações abaixo no arquivo 'src/main/resources/application.properties'
+
+spring.thymeleaf.mode=html
+spring.thymeleaf.cache=false
+
+
+Criando a página 'Person'
+----------------------------------------------------------------------------------------------------
+- Adicionar a dependência 'bootstrap' no 'pom.xml'
+
+...
+<dependency>
+  <groupId>org.webjars</groupId>
+  <artifactId>bootstrap</artifactId>
+  <version>3.3.7</version>
+</dependency>
+...
+
+- Criar o arquivo 'Person.html' na pasta 'src/main/resources/templates'
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width" />
+  <title>Persons</title>
+  <link th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}" rel="stylesheet"/>
+  <link th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap-theme.min.css}" rel="stylesheet"/>
+</head>
+<body>
+  <h1>Persons</h1>
+</body>
+</html>
+
+- Testando a aplicação
+
+  - Iniciar a aplicação
+
+  - Acessar a aplicação pela URL http://localhost:8080/persons
+
+
+Criando o Model
+----------------------------------------------------------------------------------------------------
+Lembrete: O Model é a camada onde ficam os dados do domínio.
+
+- Criar um pacote chamado 'com.ctseducare.webapplication.model'
+
+- Criar a classe 'Person' contendo o conteúdo abaixo.
+
+@Entity
+@Table(name = "persons")
+public class Person {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer id;
+	private String name;
+	private String email;
+  @DateTimeFormat(pattern = "dd/MM/yyyy")
+  private LocalDate birthday;
+  private Boolean active;
+
+  // Getters and Setters
+
+}
+
+
+Criando o Repositório
+----------------------------------------------------------------------------------------------------
+- Criar um pacote chamado 'com.ctseducare.webapplication.repository'
+
+- Criar a interface 'PersonRepository' contendo o conteúdo abaixo.
+
+public interface PersonRepository extends JpaRepository<Person, Integer> {
+
+}
+
+
+Enviando um objeto do Controller para a View
+----------------------------------------------------------------------------------------------------
+- Alterar a classe 'PersonController' conforme abaixo.
+
+@Controller
+public class PersonController {
+  
+  @Autowired
+  PersonRepository repository;
+
+	@GetMapping("/persons")
+	public ModelAndView findAll() {
+	  ModelAndView modelAndView = new ModelAndView("Person");
+	  modelAndView.addObject("persons", repository.findAll());
+	  return modelAndView;
+	}
+
+}
+
+
+Preparando os dados
+----------------------------------------------------------------------------------------------------
+- Criar o arquivo 'import.sql' na pasta 'src/main/resources'
+
+INSERT INTO persons (name, email, birthday, active) VALUES ('Fulano da Silva', 'fulano@gmail.com', '1980-02-10', true);
+INSERT INTO persons (name, email, birthday, active) VALUES ('Beltrano Gonçalves', 'beltrano@yahoo.com.br', '1981-10-21', true);
+INSERT INTO persons (name, email, birthday, active) VALUES ('Siclano Pereira', 'spereira@hotmail.com', '1980-05-30', true);
+INSERT INTO persons (name, email, birthday, active) VALUES ('Mitrus Alvarenga', 'mitrus@gmail.com', '1982-01-25', true);
+INSERT INTO persons (name, email, birthday, active) VALUES ('Fulana Alves e Silva', 'fulana@yahoo.com.br', '1981-06-05', true);
+
+
+Configurando o H2 Database
+----------------------------------------------------------------------------------------------------
+- Acresentar as linhas abaixo no arquivo 'application.properties'
+
+  spring.h2.console.enabled=true
+  spring.datasource.url=jdbc:h2:mem:persons
+
+
+Renderizando objeto pelo Thymeleaf
+----------------------------------------------------------------------------------------------------
+- Alterar a seção 'body' do arquivo 'Person.html' conforme abaixo.
+
+...
+<body>
+  <div class="panel panel-default" style="margin: 10px">
+    <div class="panel-heading">
+      <h1 class="panel-title">Persons</h1>
+    </div>
+    <div class="panel-body">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Aniversário</th>
+            <th>Ativo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="person : ${persons}">
+            <td th:text="${person.name}">AAA</td>
+            <td th:text="${person.email}">aaa@gmail.com</td>
+            <td th:text="${person.birthday}">99/99/9999</td>
+            <td th:text="${person.active}">sim</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+...
+
+
+Testando a aplicação
+----------------------------------------------------------------------------------------------------
+- Reiniciar a aplicação
+
+- Acessar a aplicação pela URL http://localhost:8080/persons
+
+
+Customizando as colunas Aniversário e Ativo
+----------------------------------------------------------------------------------------------------
+- Alterar o 'body' da tabela conforme abaixo
+
+...
+        <tbody>
+          <tr th:each="person : ${persons}">
+            <td th:text="${person.name}">AAA</td>
+            <td th:text="${person.email}">aaa@gmail.com</td>
+            <td th:text="${#temporals.format(person.birthday, 'dd-MM-yyyy')}">99/99/9999</td>
+            <td th:switch="${person.active}">
+              <p th:case="true">Sim</p>
+              <p th:case="false">Não</p>
+            </td>
+          </tr>
+        </tbody>
+...
+
+
+Testando a aplicação
+----------------------------------------------------------------------------------------------------
+- Reiniciar a aplicação
+
+- Acessar a aplicação pela URL http://localhost:8080/persons
+
+
+Acessando a console do H2
+----------------------------------------------------------------------------------------------------
+- Acessar a URL http://localhost:8080/h2-console
+
+- No campo 'JDBC URL' digitar:
+
+  jdbc:h2:mem:persons
+
+- Clicar no botão 'Connect'
+
+
+Adicionando um contato
+----------------------------------------------------------------------------------------------------
+- Acrescentar as linhas abaixo logo acima da tabela do arquivo PersonsList.html
+
+...
+      <form class="form-inline" method="POST" style="margin: 20px 0">
+        <input type="text" class="form-control" placeholder="Nome"/>
+        <input type="text" class="form-control" placeholder="Email"/>
+        <input type="text" class="form-control" placeholder="Aniversário"/>
+        <input type="text" class="form-control" placeholder="Ativo"/>
+        <input type="submit" class="form-control btn-primary" value="Salvar"/>
+      </form>
+...
+
+- Adicionar a linha abaixo no método 'listar' da classe PersonController
+
+  modelAndView.addObject("person", new Person());
+
+- Para o Thymeleaf usar o objeto 'person' no formulário, é necessário adicionar o atributo th:object
+  na tag 'form' conforme abaixo.
+
+  <form class="form-inline" method="POST" style="margin: 20px 0" th:object="${person}">
+
+- Para vincular os atributos do objeto 'person' com os campos do formulário é necessário adicionar o
+  atributo 'th:field' nas tags 'inputs'
+
+  <input type="text" class="form-control" placeholder="Nome" th:field="*{name}"/>
+  <input type="text" class="form-control" placeholder="Email" th:field="*{email}"/>
+  <input type="text" class="form-control" placeholder="Aniversário" th:field="*{birthday}"/>
+  <input type="text" class="form-control" placeholder="Ativo" th:field="*{active}"/>
+
+- Para enviar os dados do formulário ao controller é preciso adicionar o atributo 'th:action' na tag
+  'form'
+
+  <form class="form-inline" method="POST" style="margin: 20px 0" th:object="${person}" th:action="@{/persons}">
+
+- Para que o controller receba o objeto contendo os dados do formulário, precisamos adicionar o 
+  método abaixo na classe PersonController
+
+  @PostMapping("/persons")
+  public String save(Person person) {
+    repository.save(person);
+    return "redirect:/persons";
+  }
+
+- Testando a aplicação
+   
+  - Reiniciar a aplicação
+
+  - Acessar a aplicação pela URL http://localhost:8080/persons
+
+
+Substituindo o H2 pelo MySQL
+----------------------------------------------------------------------------------------------------
+- Remover a dependência do H2 do 'pom.xml'
+
+- Adicionar a dependência do MySQL do 'pom.xml'
+
+  <dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <scope>runtime</scope>
+  </dependency>
+
+- Remover as linhas abaixo do arquivo 'application.properties'
+
+  spring.h2.console.enabled=true
+  spring.datasource.url=jdbc:h2:mem:persons
+
+- Adicionar as configurações do MySQL no arquivo 'application.properties'
+
+  spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+  spring.datasource.url=jdbc:mysql://localhost:3306/persons
+  spring.datasource.username=root
+  spring.datasource.password=root
+
+  spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL57Dialect
+  spring.jpa.hibernate.ddl-auto=create-drop
+
+- Criar o banco de dados 'persons' no servidor do MySQL
+
+- Testar a aplicação
+
+  - Iniciar a aplicação
+
+  - Acessar a aplicação pela URL http://localhost:8080/persons
+
+- Acessar o console do MySQL e verificar se a tabela foi criada
+
+
+EXERCÍCIO
+----------------------------------------------------------------------------------------------------
+Acrescentar o dado 'telefone' no cadastro da pessoa.
+
+

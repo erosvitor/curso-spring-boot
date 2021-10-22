@@ -1,0 +1,74 @@
+
+====================================================================================================
+CURSO SPRING BOOT - HELLO WORLD
+====================================================================================================
+
+Criando o projeto
+----------------------------------------------------------------------------------------------------
+- Criar um projeto Spring Starter Project utilizando os seguintes dados:
+  Name: helloworld
+  Type: Maven Project
+  Packaging: jar
+  Java Version: 16
+  Language: Java
+  Group: com.ctseducare
+  Artifact: helloworld
+  Version: 0.0.1-SNAPSHOT
+
+- Adicionar as seguintes dependencias:
+  - Spring Web
+
+
+Definindo um Controller
+----------------------------------------------------------------------------------------------------
+- Criar a classe HelloWorldController no pacote 'com.ctseducare.helloworld' com o conteúdo abaixo.
+
+@RestController
+public class HelloWorldController {
+
+  @GetMapping("/")
+  String hello() {
+    return "Hello Spring Boot!!!";
+  }
+
+}
+
+- Testar a aplicação
+
+  - Iniciar a aplicação
+
+  - Acessar a aplicação
+
+    http://localhost:8080
+
+
+Customizações
+----------------------------------------------------------------------------------------------------
+- Alterar nome da classe 'HelloworldApplication.java' para 'StartApplication.java'
+
+- Alterar a porta do servidor Tomcat
+
+  - No arquivo 'application.properties' adicionar a linha abaixo.
+
+    server.port=9090
+
+- Remover as pastas 'static' e 'templates'
+
+- Remover o arquivo HELP.md
+
+- Testar a aplicação
+
+  - Reiniciar a aplicação
+
+  - Acessar a aplicação
+
+    http://localhost:9090
+
+
+EXERCÍCIO
+----------------------------------------------------------------------------------------------------
+Criar uma apliicação Spring Boot que disponibilize a data atual através do seguinte endereço:
+
+  http://localhost:7760/currenttime
+
+

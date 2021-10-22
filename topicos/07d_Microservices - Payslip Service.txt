@@ -1,0 +1,225 @@
+
+====================================================================================================
+CURSO SPRING BOOT - MICROSERVICES - PAYSLIP SERVICE
+====================================================================================================
+
+Creating the service
+----------------------------------------------------------------------------------------------------
+
+TIP: The service will be a Maven Module
+
+- Select the 'spring-boot-microservices' project and File > New > Other > Maven Module
+
+- Check the 'Create a simple project'
+
+- Type 'payslip' in 'Module name' field and click on 'Finish' button
+
+- Add the 'starter web' dependency on 'pom.xml' file
+
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+  </dependencies>
+  ...
+
+- Create the 'com.ctseducare.payslip' package
+
+- Create the 'StartApplication' class
+
+@SpringBootApplication
+public class StartApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(StartApplication.class, args);
+  }
+  
+}
+
+- Create the 'com.ctseducare.payslip.controller' package
+
+- Create the 'PayslipController' class
+
+@RestController
+public class PayslipController {
+
+  @GetMapping
+  String status() {
+    return "I am up!";
+  }
+  
+}
+
+- Defining the server port
+
+  server.port=8081
+
+- Checking the 'payslip' service
+
+  - Start the 'payslip' service
+
+  - Enter the http://localhost:8081 in your browser
+
+
+Creating DTOs
+----------------------------------------------------------------------------------------------------
+
+TIP: The DTO is a design pattern designed to transfer data between system layers.
+
+- Create the 'com.ctseducare.payslip.dto' package
+
+- Create the 'EmployeeDTO' class
+
+public class EmployeeDTO {
+
+  private Integer id;
+  private String name;
+  private Double salary;
+
+  // Getters and Setters
+}
+
+- Create the 'PayslipDTO' class
+
+public class PayslipDTO {
+
+  private Integer id;
+  private String name;
+  private Double salary;
+  private Double fgts;
+  private Double inss;
+
+  // Getters and Setters
+}
+
+
+Adding the code for calculus
+----------------------------------------------------------------------------------------------------
+- Create the 'com.ctseducare.payslip.util'
+
+- Create the 'PayslipCalculus' class
+
+  public static double fgts(double salary) {
+    return salary * (0.08);
+  }
+  
+  public static double inss(double salary) {
+    double rateRange1 = 7.5 / 100.0;
+    double rateRange2 = 9.0 / 100.0;
+    double rateRange3 = 12.0 / 100.0;
+    double rateRange4 = 14.0 / 100.0;
+    
+    double inss = 0.0;
+    
+    if (salary <= 1100.00) {
+      inss = salary * rateRange1;
+      
+    } else if (salary <= 2203.48) {
+      inss = 1100.00 * rateRange1;
+      inss += (salary - 1100.00) * rateRange2;
+      
+    } else if (salary <= 3305.22) {
+      inss = 1100.00 * rateRange1;
+      inss += (2203.48 - 1100.00) * rateRange2;
+      inss += (salary - 2203.49) * rateRange3;
+      
+    } else if (salary <= 6433.57) {
+      inss = 1100.00 * rateRange1;
+      inss += (2203.48 - 1100.00) * rateRange2;
+      inss += (3305.22 - 2203.49) * rateRange3;
+      inss += (salary - 3305.22) * rateRange4;
+    } else {
+      inss = 751.99;
+    }
+    
+    return inss;
+  }
+
+
+Creating the service to generate payslip
+----------------------------------------------------------------------------------------------------
+- Create the 'com.ctseducare.payslip.service' package
+
+- Create the 'PayslipService' class
+
+@Service
+public class PayslipService {
+  
+  public List<PayslipDTO> generatePayslip(List<EmployeeDTO> employees) {
+    List<PayslipDTO> payslips = new ArrayList<>();
+    for (EmployeeDTO employee : employees) {
+      PayslipDTO payslip = new PayslipDTO();
+      payslip.setId(employee.getId());
+      payslip.setName(employee.getName());
+      payslip.setSalary(employee.getSalary());
+      payslip.setFgts(PayslipCalculus.fgts(employee.getSalary()));
+      payslip.setInss(PayslipCalculus.inss(employee.getSalary()));
+      payslips.add(payslip);
+    }
+    return payslips;
+  }
+
+}
+
+
+Adding the endpoint to payslip
+----------------------------------------------------------------------------------------------------
+- Add the following lines in 'PayslipController' class
+
+  ...
+  @Autowired
+  PayslipService service;
+  
+  @PostMapping("/payslip")
+  ResponseEntity<List<PayslipDTO>> payslips(@RequestBody List<EmployeeDTO> employees) {
+    List<PayslipDTO> result = service.generatePayslip(employees);
+    return ResponseEntity.ok(result);
+  }
+  ...
+
+
+Checking the 'payslip' service
+----------------------------------------------------------------------------------------------------
+- Start the payslip service
+
+- Start the Postman application
+
+- Create a POST request for 'http://localhost:8081/payslip'
+
+- Use the following JSON as request body
+
+[
+  {
+    "id": 1,
+    "name": "Fulano da Silva",
+    "salary": 1500.00
+  },
+  {
+    "id": 2,
+    "name": "Beltrano Gonçalves",
+    "salary": 3000.00
+  }
+]
+
+- The response must be equals to
+
+[
+  {
+    "id": 1,
+    "name": "Fulano da Silva",
+    "salary": 1500.0,
+    "fgts": 120.0,
+    "inss": 118.5
+  },
+  {
+    "id": 2,
+    "name": "Beltrano Gonçalves",
+    "salary": 3000.0,
+    "fgts": 240.0,
+    "inss": 277.3944
+  }
+]
+
+

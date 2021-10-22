@@ -1,0 +1,40 @@
+
+====================================================================================================
+CURSO SPRING BOOT - MICROSERVICES - PAYROLL PROJECT
+====================================================================================================
+
+Creating the project
+----------------------------------------------------------------------------------------------------
+
+TIP: The project will use the Multiple Modules resource provide by Apache Maven.
+
+- Run the Spring Tools Suite
+
+- Select File > New > Other > Maven Project 
+
+- Check the option 'Create a simple project' and click on 'Next' button
+
+- Fill the following fields
+
+  Group Id: com.ctseducare
+  Artifact Id: spring-boot-microservices
+  Packaging: pom
+
+- Click on 'Finish' button
+
+- Add the following lines in 'pom.xml' file
+
+  ...
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.5.5</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+  
+  <properties>
+    <java.version>16</java.version>
+  </properties>
+  ...
+
+

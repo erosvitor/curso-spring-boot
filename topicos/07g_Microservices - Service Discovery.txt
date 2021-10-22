@@ -1,0 +1,171 @@
+
+====================================================================================================
+CURSO SPRING BOOT - MICROSERVICES - SERVICE DISCOVERY
+====================================================================================================
+
+Introduction
+----------------------------------------------------------------------------------------------------
+
+
+Creating the Eureka Server service
+----------------------------------------------------------------------------------------------------
+- Select the 'spring-boot-microservices' project and File > New > Other > Maven Module
+
+- Check the 'Create a simple project'
+
+- Type 'eurekaserver' in 'Module name' field and click on 'Finish' button
+
+- Adding the Eureka Server dependency
+
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+      <version>3.0.3</version>
+    </dependency>  
+  </dependencies>
+  ...
+
+- Create the 'com.ctseducare.eureka' package
+
+- Create the 'StartApplication' class
+
+@SpringBootApplication
+@EnableEurekaServer
+public class StartApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(StartApplication.class, args);
+  }
+  
+}
+
+
+- Add following configurations in 'application.properties'
+
+server.port=8761
+spring.application.name=eureka-server
+eureka.client.register-with-eureka=false
+eureka.client.fetch-registry=false
+
+
+- Cheking the Eureka Server
+
+  - Start the 'eurekaserver' service
+
+  - Enter the http://localhost:8761 in your browser
+
+
+Setting 'employee' service as Eureka client
+----------------------------------------------------------------------------------------------------
+- Add the following dependency
+
+  ...
+	<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+    <version>3.0.3</version>
+  </dependency>
+  ...
+
+- Add the following annotation in main class
+
+  ...
+  @EnableEurekaClient
+  ...
+
+- Change the server port to
+
+  server.port=${PORT:0}
+
+- Add the following lines in 'application.properties'
+
+  eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+  eureka.instance.instance-id=${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+- Testing 'employee' service
+
+  - Start the 'eureka' server
+
+  - Start the 'employee' service
+
+  - Find the port of 'employee' service
+
+  - Find the 'employee' service on Eureka dashboard
+
+
+Setting 'payslip' service as Eureka client
+----------------------------------------------------------------------------------------------------
+- Add the following dependency
+
+  ...
+	<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+    <version>3.0.3</version>
+  </dependency>
+  ...
+
+- Add the following annotation in main class
+
+  ...
+  @EnableEurekaClient
+  ...
+
+- Change the server port to
+
+  server.port=${PORT:0}
+
+- Add the following lines in 'application.properties'
+
+  eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+  eureka.instance.instance-id=${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+- Testing 'payslip' service
+
+  - Start the 'payslip' service
+
+  - Find the port of 'payslip' service
+
+  - Find the 'payslip' service on Eureka dashboard
+
+
+Setting 'payroll' service as Eureka client
+----------------------------------------------------------------------------------------------------
+- Add the following dependency
+
+  ...
+	<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+    <version>3.0.3</version>
+  </dependency>
+  ...
+
+- Add the following annotation in main class
+
+  ...
+  @EnableEurekaClient
+  ...
+
+- Change the server port to
+
+  server.port=${PORT:0}
+
+- Add the following lines in 'application.properties'
+
+  eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+  eureka.instance.instance-id=${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+- Testing 'payroll' service
+
+  - Start the 'payroll' service
+
+  - Find the port of 'payroll' service
+
+  - Find the 'payroll' service on Eureka dashboard
+
+- Remove 'url' parameter from @FeignClient
+
+

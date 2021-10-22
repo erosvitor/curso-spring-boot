@@ -1,0 +1,174 @@
+
+====================================================================================================
+CURSO SPRING BOOT - ACTUATOR
+====================================================================================================
+
+Introdução
+----------------------------------------------------------------------------------------------------
+O Actuator é um subprojeto do Spring Boot que ajuda a monitorar e a gerenciar a aplicação quando ela
+estivar publicada (em execução).
+
+
+Criando o projeto
+----------------------------------------------------------------------------------------------------
+- Criar um projeto 'Spring Starter Project' utilizando os seguintes dados:
+
+  Name: spring-boot-actuator
+  Type: Maven Project
+  Packaging: jar
+  Java Version: 16
+  Language: Java
+  Group: com.ctseducare
+  Artifact: actuator
+  Version: 0.0.1-SNAPSHOT
+
+- Adicionar as seguintes dependencias:
+
+  - Spring Web
+  - Spring Boot Actuator
+
+
+Acessando o Actuator
+----------------------------------------------------------------------------------------------------
+- Iniciar a aplicação
+
+- Acessar a URL abaixo
+
+  http://localhost:8080/actuator
+
+  Obs.: Por padrão estará disponível apenas os endpoint health e o próprio actuator
+
+
+Expondo todos os endpoints
+----------------------------------------------------------------------------------------------------
+- Para exibir todos os endpoints disponíveis é necessário adicionar a linha abaixo no arquivo
+  'application.properties'
+
+  management.endpoints.web.exposure.include=*
+
+
+Ocultando endpoints
+----------------------------------------------------------------------------------------------------
+- Para ocultar um ou mais endpoints é necessário adicionar a linha abaixo no arquivo
+  'application.properties'
+
+  management.endpoints.web.exposure.exclude=beans, caches
+
+  Obs: Ocultar um por um dos endpoints é muito trabalhoso. Para facilitar, vamos inverter a lógica.
+  Iremos expor apenas os endpoints que precisamos. Os demais serão exibidos
+
+  management.endpoints.web.exposure.include=health, info, metrics
+
+
+Customizando o nome padrão do endpoint 'actuator'
+----------------------------------------------------------------------------------------------------
+- Adicionar a propriedade abaixo no arquivo 'application.properties' 
+
+  management.endpoints.web.base-path=/monitor
+
+  Obs.: A propriedade a acima altera o nome 'actuator' para 'monitor'
+
+- Reinicar a aplicação
+
+- Acessar a URL
+
+  http://localhost:8080/monitor
+
+
+Customizando o endpoint 'health'
+----------------------------------------------------------------------------------------------------
+- Por padrão o endpoint 'health' exibe poucas informações. Para exibir mais informações deve-se
+  adicionar a propriedade abaixo no arquivo 'application.properties'
+
+  management.endpoint.health.show-details=always
+
+
+Customizando o endpoint 'info'
+----------------------------------------------------------------------------------------------------
+- Adicionar as propriedades abaixo no arquivo 'application.properties'
+
+info.app.name=spring-boot-actuator
+info.app.description=Projeto exemplo que mostra como utilizar o recurso 'Actuator' do Spring Boot
+info.app.version=0.0.1-SNAPSHOT
+info.app.author=Eros Vitor Bornatowski
+
+- Reinicar a aplicação
+
+- Acessar a URL
+
+  http://localhost:8080/actuator/info
+
+
+Utilizando o endpoint 'metrics'
+----------------------------------------------------------------------------------------------------
+- O endpoint 'metrics' exibe várias métricas de sistemas que podem ser utilizadas para obter dados
+  referentes a partes do sistema operacional.
+
+  Para usar uma métrica, basta adicionar o nome da métrica após o endpoint '/monitor/metrics/'. Por
+  exemplo:
+
+    http://localhost:8080/actuator/metrics/system.cpu.usage
+
+
+Endpoint httptrace
+----------------------------------------------------------------------------------------------------
+- Incluir o endpoint na lista dos endpoints disponíveis
+
+  management.endpoints.web.exposure.include=health, info, metrics, httptrace
+
+- Criar o pacote 'com.ctseducare.actuator.config'
+
+- Criar a classe 'HttpTraceActuatorConfiguration' com o conteúdo abaixo.
+
+@Configuration
+public class HttpTraceActuatorConfiguration {
+
+  @Bean
+  public HttpTraceRepository httpTraceRepository() {
+    return new InMemoryHttpTraceRepository();
+  }
+
+}
+
+- Reiniciar a aplicação
+
+- Acessar a URL http://localhost:8080/teste123
+
+- Acessar o endpoint 'httptrace'
+
+  http://localhost:8080/monitor/httptrace
+
+
+Criando um endpoint customizado
+----------------------------------------------------------------------------------------------------
+- Criar o pacote 'com.ctseducare.actuator.custom'
+
+- Criar a classe 'MemoryStatusActuator' com o conteúdo abaixo
+
+@Component
+@Endpoint(id="memorystatus")
+public class MemoryStatusActuator {
+  
+  @Bean
+  @ReadOperation
+  public Map<String, Object> memoryStatus() {
+    Map<String, Object> mem = new LinkedHashMap<>();
+    mem.put("JVM Total memory", Runtime.getRuntime().totalMemory());
+    mem.put("JVM Max memory", Runtime.getRuntime().maxMemory());
+    mem.put("JVM Free memory", Runtime.getRuntime().freeMemory());
+    return mem;
+  }
+
+}
+
+- Incluir o endpoint na lista dos endpoints disponíveis
+
+  management.endpoints.web.exposure.include=health, info, metrics, httptrace, memorystatus
+
+- Reinicar a aplicação
+
+- Acessar a URL
+
+  http://localhost:8080/monitor/memorystatus
+
+
