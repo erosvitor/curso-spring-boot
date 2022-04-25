@@ -22,37 +22,5 @@ As seguintes tecnologias foram utilizadas neste projeto:
 * [Spring Cloud Gateway](https://spring.io/projects/spring-cloud-gateway)
 * [Spring Tools Suite](https://spring.io/tools)
 
-### Testando o projeto
-**Passo 1:** Iniciar os serviços usando o STS ou pelo Maven na linha de comando
-* eurekaserver
-* gatewayserver
-* employee
-* payslip
-* payroll
-
-**Passo 2:** Verificar os serviços usando o dashboard do Eureka
-
-```
-http://localhost:8761
-```
-
-**Passo 3:** Inserindo um funcionário
-
-```
-curl --location --request POST 'http://localhost:8888/employee' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "name": "Fulano da Silva",
-    "email": "fulano@yahoo.com.br",
-    "salary": 3000.00
-}'
-```
-
-**Passo 4:** Calculando a folha de pagamento
-
-```
-curl --location --request GET 'http://localhost:8888/payroll'
-```
-
 ## Licença
 Este projeto está sob licença do MIT. Para mais detalhes, ver o arquivo LICENSE.
